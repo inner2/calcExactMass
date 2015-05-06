@@ -2,17 +2,24 @@
 
 {% block content %}
 <div class="container">
-    <h1>分子量計算</h1>
+    <h1>精密質量から分子式を計算するプログラム</h1>
     <hr>
-    <h2>[入力フォーム]</h2>
+    <h2>input:</h2>
     <form method="post" action="{{url_for('index')}}">
-        <input type="text" class="form-control" name="text" >
+        <input type="number" class="form-control" name="text" placeholder="質量数をいれてください（数字のみ）">
         <button type="submit" class="btn btn-primary">ボタン</button>
     </form>
     <hr>
     <h2>計算結果</h2>
-    {% if result %}
-        <h3>{{ result }} </h3>
+    {% if input %}
+        <p>入力値：{{ input }} </p>
+        <table>
+        <caption>結果一覧</caption>
+        <tr><th>番号</th><th>Formula</th><th>ExactMass</th><th>Delta</th></tr>
+        {% for result in results %}
+            <tr><th>{{loop.index}}</th><th>{{ result['Formula'] }}</th><th>{{ result['ExactMass'] }}</th><th>{{ result['Delta'] }}</th></tr>
+        {% endfor %}
+        </table>
     {% else %}
         <h3>none</h3>
     {% endif %}
