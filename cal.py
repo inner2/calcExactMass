@@ -26,11 +26,16 @@ def calc_exact_mass(mw):
 
     # 分子量計算
     for noc in range(element_max['c']):
+        mc = noc * atomic_weight['c']
         for noh in range(element_max['h']):
+            mh = noh * atomic_weight['h']
             for noo in range(element_max['o']):
+                mo = noo * atomic_weight['o']
                 for non in range(element_max['n']):
-                    mz = noc * atomic_weight['c'] + noh * atomic_weight['h'] + noo * atomic_weight['o'] + non * atomic_weight['n']
-                    # 理論値からのズレを計算 Delta
+                    mn = non * atomic_weight['n']
+
+                    mz = mc + mh + mo + mn
+                    # 理論値(mz)と実測値(mw)のズレを計算 Delta
                     delta = math.fabs(mw - mz)
                     # 誤差の大きいものはデータベースに入れない
                     if delta < 1:
@@ -39,12 +44,11 @@ def calc_exact_mass(mw):
                         db.Mass.insert({'ExactMass': mz, 'C': noc, 'H': noh, 'O': noo, 'N': non, 'Rdb': rdb, 'Delta': delta })
     # Massのfind
     query = db.Mass.find()
-    for data in query:
-        print(data)
     return query
 
 if __name__ == "__main__":
     mass = calc_exact_mass(170)
     print("---")
-    print(mass)
+    result = mass.sort('Delta').limit(10)
+    print(list(result))
     print("program end")
