@@ -29,8 +29,12 @@ def calc_exact_mass(mw):
         mc = noc * atomic_weight['c']
         for noh in range(element_max['h']):
             mh = noh * atomic_weight['h']
+            if mc + mh > mw:
+                break
             for noo in range(element_max['o']):
                 mo = noo * atomic_weight['o']
+                if mc + mh + mo > mw:
+                    break
                 for non in range(element_max['n']):
                     mn = non * atomic_weight['n']
 
