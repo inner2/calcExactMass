@@ -2,16 +2,50 @@
 # Module
 import sqlite3
 import math
+import configparser
 
+# config parser
+config = configparser.ConfigParser()
 # Connect database
 conn = sqlite3.connect(':memory:')
 c = conn.cursor()
 
-# パラメーターの初期設定
+# パラメーターの初期
 element_max = {'c': 100, 'h': 200, 'o': 30, 'n': 30}  # 元素の最大値
 atomic_weight = {'c': 12, 'h': 1.00782503, 'o': 15.9949146, 'n': 14.003074}  # 原子量
 delta_range = 1  # 誤差の範囲 delta の絞り込み範囲
 result_limit = 15  # 結果の表示数
+
+
+# config file write
+def conf_write(nc, nh, no, nn, delta, result_num):
+    conf = {'c': nc, 'h': nh, 'o': no, 'n': nn, 'delta': delta, 'result_num': result_num}
+    config['conf'] = conf
+    with open('config.txt', 'w') as configfile:
+        config.write(configfile)
+
+
+# config file read
+def conf_read():
+    config.read('config.txt')
+    element_max['c'] = config['conf']['c']
+    element_max['h'] = config['conf']['h']
+    element_max['o'] = config['conf']['o']
+    element_max['n'] = config['conf']['n']
+    delta_range = config['conf']['delta']
+    result_limit = config['conf']['result_num']
+
+
+# show config
+def conf_show():
+    print('================')
+    print('C : ' + str(element_max['c']))
+    print('H : ' + str(element_max['h']))
+    print('O : ' + str(element_max['o']))
+    print('N : ' + str(element_max['n']))
+    print('delta : ' + str(result_limit))
+    print('result_num :' + str(result_limit))
+    print('================')
 
 
 # 分子量を計算する関数
@@ -65,9 +99,15 @@ def db_close():
     conn.close()
 
 
+# Main
 if __name__ == "__main__":
+
+    conf_write(100, 400, 10, 10, 5, 10)
+    conf_read()
+    conf_show()
+'''
     db_table_create()
     print(" m/z ?")
-    mz = input()
-    calc_exact_mass(float(mz))
-    db_close()
+    input_mz = input()
+    calc_exact_mass(float(input_mz))
+    db_close()'''

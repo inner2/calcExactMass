@@ -1,0 +1,8 @@
+[conf]
+n = 10
+result_num = 10
+h = 400
+c = 100
+delta = 5
+o = 10
+
