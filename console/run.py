@@ -1,18 +1,18 @@
-from pymongo import MongoClient
+# python3
+# Module
+import sqlite3
 import math
-from flask import Flask, render_template, request
 
-app = Flask(__name__)
-
-client = MongoClient()  # 接続先を指定Localhostの場合はvoidで良い
-db = client['calcMass']  # データベースを選択
-
+# Connect database
+conn = sqlite3.connect(':memory:')
+c = conn.cursor()
 
 # パラメーターの初期設定
 element_max = {'c': 100, 'h': 200, 'o': 30, 'n': 30}  # 元素の最大値
 atomic_weight = {'c': 12, 'h': 1.00782503, 'o': 15.9949146, 'n': 14.003074}  # 原子量
 delta_range = 1  # 誤差の範囲 delta の絞り込み範囲
-result_limit = 15 # 結果の表示数
+result_limit = 15  # 結果の表示数
+
 
 # 分子量を計算する関数
 def calc_exact_mass(mz):
@@ -41,25 +41,33 @@ def calc_exact_mass(mz):
                         rdb = (2 * noc + 2 - noh + non) / 2
                         formula = "C" + str(noc) + "H" + str(noh) + "O" + str(noo) + "N" + str(non)
                         # Massの項目追加
-                        db.Mass.insert({'Formula':formula, 'ExactMass': mw, 'C': noc, 'H': noh, 'O': noo, 'N': non, 'Rdb': rdb, 'Delta': delta })
+                        c.execute("insert into stocks values(?, ?, ?, ?, ?, ?, ?, ?)", (formula, mw, noc, noh, noo, non, rdb, delta))
+
     # Massのfind
-    query = db.Mass.find()
-    result = list(query.sort('Delta').limit(result_limit))
-    return result
+    # データの抽出
+    c.execute("select * from stocks order by delta asc limit '" + str(result_limit) + "'")
+    result_list = c.fetchall()
+    for result in result_list:
+        print(result)
 
 
-# flask
-@app.route("/", methods=['GET', 'POST'])
-def index():
-    if request.method == "POST":
-        input_mass = request.form["text"]
-        if input_mass:
-            # データベースの削除
-            client.drop_database(db)
-            # 分子式の計算関数を実行
-            mass = calc_exact_mass(int(input_mass))
-            return render_template("calcMass.html", input = input_mass, results = mass)
-    return render_template("calcMass.html", input = "none")
+# DB create table
+def db_table_create():
+    # テーブルの作成
+    c.execute("create table stocks(Formula, ExactMass, c, h, o, n, rdb, delta)")
+
+
+# DB close
+def db_close():
+    # Save
+    # conn.save()
+    # Close
+    conn.close()
+
 
 if __name__ == "__main__":
-    app.run()
+    db_table_create()
+    print(" m/z ?")
+    mz = input()
+    calc_exact_mass(float(mz))
+    db_close()
